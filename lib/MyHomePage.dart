@@ -37,9 +37,9 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(widget.title),
           bottom: const TabBar(
-            labelColor: Colors.deepPurple,
+            labelColor: Color.fromARGB(255, 211, 159, 108),
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.deepPurple,
+            indicatorColor: Color.fromARGB(255, 211, 159, 108),
             tabs: [
               Tab(icon: Icon(Icons.home), text: "Pending Tasks"),
               Tab(icon: Icon(Icons.check), text: "Completed Tasks"),
