@@ -7,8 +7,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  void theme() {}
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
