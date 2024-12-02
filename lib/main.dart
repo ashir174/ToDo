@@ -7,6 +7,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  void theme() {}
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color.fromARGB(255, 211, 159, 108), // FAB color
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromARGB(255, 240, 240, 240), // Subtle grey color for the AppBar
+          backgroundColor: Color.fromARGB(
+              255, 240, 240, 240), // Subtle grey color for the AppBar
           elevation: 1, // Optional: adds a subtle shadow
           titleTextStyle: TextStyle(
             color: Colors.black, // Set AppBar title text color
