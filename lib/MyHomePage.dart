@@ -12,21 +12,108 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final TextEditingController _searchController = TextEditingController();
+
   List<Task> pendingTasks = [];
   List<Task> completedTasks = [];
+  List<Task> filteredTasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredTasks = pendingTasks; // Initially, show all pending tasks
+  }
 
   void _addTask(String title) {
     setState(() {
       pendingTasks.add(Task(title: title));
+      filteredTasks = pendingTasks; // Update filtered list
     });
   }
 
-  void _markAsCompleted(Task task) {
+  void _editTask(Task task) {
+    final TextEditingController _editController =
+        TextEditingController(text: task.title);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Edit Task"),
+          content: TextField(
+            controller: _editController,
+            decoration: const InputDecoration(
+              hintText: "Enter new task title",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  task.title = _editController.text;
+                  filteredTasks = pendingTasks; // Update filtered list
+                });
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteTask(Task task, bool isCompleted) {
     setState(() {
-      task.isCompleted = true;
-      pendingTasks.remove(task);
-      completedTasks.add(task);
+      if (isCompleted) {
+        completedTasks.remove(task);
+      } else {
+        pendingTasks.remove(task);
+        filteredTasks = pendingTasks; // Update filtered list
+      }
     });
+  }
+
+  void _toggleCompleted(Task task) {
+    setState(() {
+      if (task.isCompleted) {
+        // If unchecked, move back to pending
+        completedTasks.remove(task);
+        task.isCompleted = false;
+        pendingTasks.add(task);
+        filteredTasks = pendingTasks; // Update filtered list
+      } else {
+        // If checked, move to completed
+        task.isCompleted = true;
+        pendingTasks.remove(task);
+        completedTasks.add(task);
+        filteredTasks = pendingTasks; // Update filtered list
+      }
+    });
+  }
+
+  void _filterTasks(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredTasks = pendingTasks;
+      } else {
+        filteredTasks = pendingTasks
+            .where((task) =>
+                task.title.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _filterTasks('');
   }
 
   @override
@@ -48,32 +135,93 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: TabBarView(
           children: [
-            // Pending Tasks
-            ListView.builder(
-              itemCount: pendingTasks.length,
-              itemBuilder: (context, index) {
-                final task = pendingTasks[index];
-                return ListTile(
-                  title: Text(task.title),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.check),
-                    onPressed: () {
-                      _markAsCompleted(task);
+            // Pending Tasks with Checkbox, Edit, Delete
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    autofocus: false,
+                    controller: _searchController,
+                    onChanged: _filterTasks,
+                    decoration: InputDecoration(
+                      hintText: 'Search tasks...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.cancel),
+                              onPressed: _clearSearch,
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredTasks.length,
+                    itemBuilder: (context, index) {
+                      final task = filteredTasks[index];
+                      return Container(
+                        color: const Color.fromARGB(
+                            255, 240, 240, 240), // Light grey background
+                        margin: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: ListTile(
+                          title: Text(task.title),
+                          leading: Checkbox(
+                            value: task.isCompleted,
+                            onChanged: (value) {
+                              _toggleCompleted(task);
+                            },
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.brown),
+                                onPressed: () {
+                                  _editTask(task);
+                                },
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  _deleteTask(task, false);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-            // Completed Tasks
+            // Completed Tasks with Delete
             ListView.builder(
               itemCount: completedTasks.length,
               itemBuilder: (context, index) {
                 final task = completedTasks[index];
-                return ListTile(
-                  title: Text(
-                    task.title,
-                    style:
-                        const TextStyle(decoration: TextDecoration.lineThrough),
+                return Container(
+                  color: Colors.grey[200], // Light grey background
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    title: Text(
+                      task.title,
+                      style: const TextStyle(
+                          decoration: TextDecoration.lineThrough),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        _deleteTask(task, true);
+                      },
+                    ),
                   ),
                 );
               },
@@ -96,13 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 );
               },
-              child: const Text(
-                "+",
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              child: const Icon(Icons.add),
             ),
           ),
         ),
