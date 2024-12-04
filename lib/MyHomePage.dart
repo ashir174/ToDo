@@ -57,7 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   task.title = _editController.text;
-                  filteredTasks = pendingTasks; // Update filtered list
+                  if (!task.isCompleted) {
+                    filteredTasks = pendingTasks; // Update filtered list
+                  }
                 });
                 Navigator.pop(context); // Close the dialog
               },
@@ -83,13 +85,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void _toggleCompleted(Task task) {
     setState(() {
       if (task.isCompleted) {
-        // If unchecked, move back to pending
+        // Restore to pending
         completedTasks.remove(task);
         task.isCompleted = false;
         pendingTasks.add(task);
         filteredTasks = pendingTasks; // Update filtered list
       } else {
-        // If checked, move to completed
+        // Move to completed
         task.isCompleted = true;
         pendingTasks.remove(task);
         completedTasks.add(task);
@@ -141,7 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    autofocus: false,
                     controller: _searchController,
                     onChanged: _filterTasks,
                     decoration: InputDecoration(
@@ -202,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            // Completed Tasks with Delete
+            // Completed Tasks with Edit and Restore
             ListView.builder(
               itemCount: completedTasks.length,
               itemBuilder: (context, index) {
@@ -211,16 +212,29 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.grey[200], // Light grey background
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ListTile(
-                    title: Text(
-                      task.title,
-                      style: const TextStyle(
-                          decoration: TextDecoration.lineThrough),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        _deleteTask(task, true);
+                    title: Text(task.title), // Removed strikethrough
+                    leading: Checkbox(
+                      value: task.isCompleted,
+                      onChanged: (value) {
+                        _toggleCompleted(task);
                       },
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.brown),
+                          onPressed: () {
+                            _editTask(task);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _deleteTask(task, true);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );
