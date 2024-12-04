@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _editTask(Task task) {
-    final TextEditingController _editController =
+    final TextEditingController editController =
         TextEditingController(text: task.title);
 
     showDialog(
@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return AlertDialog(
           title: const Text("Edit Task"),
           content: TextField(
-            controller: _editController,
+            controller: editController,
             decoration: const InputDecoration(
               hintText: "Enter new task title",
             ),
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  task.title = _editController.text;
+                  task.title = editController.text;
                   if (!task.isCompleted) {
                     filteredTasks = pendingTasks; // Update filtered list
                   }
