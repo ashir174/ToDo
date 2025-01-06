@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class AddItem extends StatefulWidget {
   final Function(String, DateTime) onAdd;
 
-  const AddItem({Key? key, required this.onAdd}) : super(key: key);
+  const AddItem({super.key, required this.onAdd});
 
   @override
   _AddItemState createState() => _AddItemState();

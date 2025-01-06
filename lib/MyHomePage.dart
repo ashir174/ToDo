@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 10),
               TextFormField(
                 initialValue: task.dateTime != null
-                    ? "${task.dateTime?.day}-${task.dateTime?.month}-${task.dateTime?.year}"
+                    ? "${task.dateTime.day}-${task.dateTime.month}-${task.dateTime.year}"
                     : "",
                 onTap: () async {
                   DateTime? picked = await showDatePicker(
@@ -76,8 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           picked.year,
                           picked.month,
                           picked.day,
-                          task.dateTime?.hour ?? 0,
-                          task.dateTime?.minute ?? 0);
+                          task.dateTime.hour ?? 0,
+                          task.dateTime.minute ?? 0);
                     });
                   }
                 },
@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 10),
               TextFormField(
                 initialValue: task.dateTime != null
-                    ? "Time: ${task.dateTime?.hour}:${task.dateTime?.minute}"
+                    ? "Time: ${task.dateTime.hour}:${task.dateTime.minute}"
                     : "Time: Not Set",
                 onTap: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
@@ -99,9 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   if (pickedTime != null) {
                     setState(() {
                       task.dateTime = DateTime(
-                        task.dateTime?.year ?? 0,
-                        task.dateTime?.month ?? 0,
-                        task.dateTime?.day ?? 0,
+                        task.dateTime.year ?? 0,
+                        task.dateTime.month ?? 0,
+                        task.dateTime.day ?? 0,
                         pickedTime.hour,
                         pickedTime.minute,
                       );
