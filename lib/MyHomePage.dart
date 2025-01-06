@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'task.dart';
 import 'AddItem.dart';
 
@@ -24,9 +25,9 @@ class _MyHomePageState extends State<MyHomePage> {
     filteredTasks = pendingTasks; // Initially, show all pending tasks
   }
 
-  void _addTask(String title) {
+  void _addTask(String title, DateTime dateTime) {
     setState(() {
-      pendingTasks.add(Task(title: title));
+      pendingTasks.add(Task(title: title, dateTime: dateTime));
       filteredTasks = pendingTasks; // Update filtered list
     });
   }
@@ -34,17 +35,64 @@ class _MyHomePageState extends State<MyHomePage> {
   void _editTask(Task task) {
     final TextEditingController editController =
         TextEditingController(text: task.title);
+    DateTime tempDate = task.dateTime;
+    TimeOfDay tempTime = TimeOfDay.fromDateTime(task.dateTime);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text("Edit Task"),
-          content: TextField(
-            controller: editController,
-            decoration: const InputDecoration(
-              hintText: "Enter new task title",
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: editController,
+                decoration: const InputDecoration(
+                  hintText: "Enter new task title",
+                ),
+              ),
+              Row(
+                children: [
+                  Text('Date: ${DateFormat('dd-MM-yyyy').format(tempDate)}'),
+                  IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () async {
+                      DateTime? selected = await showDatePicker(
+                        context: context,
+                        initialDate: tempDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (selected != null && selected != tempDate) {
+                        setState(() {
+                          tempDate = selected;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text('Time: ${tempTime.format(context)}'),
+                  IconButton(
+                    icon: const Icon(Icons.access_time),
+                    onPressed: () async {
+                      TimeOfDay? selected = await showTimePicker(
+                        context: context,
+                        initialTime: tempTime,
+                      );
+                      if (selected != null && selected != tempTime) {
+                        setState(() {
+                          tempTime = selected;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -57,6 +105,13 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   task.title = editController.text;
+                  task.dateTime = DateTime(
+                    tempDate.year,
+                    tempDate.month,
+                    tempDate.day,
+                    tempTime.hour,
+                    tempTime.minute,
+                  );
                   if (!task.isCompleted) {
                     filteredTasks = pendingTasks; // Update filtered list
                   }
@@ -165,37 +220,34 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: filteredTasks.length,
                     itemBuilder: (context, index) {
                       final task = filteredTasks[index];
-                      return Container(
-                        color: const Color.fromARGB(
-                            255, 240, 240, 240), // Light grey background
-                        margin: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: ListTile(
-                          title: Text(task.title),
-                          leading: Checkbox(
-                            value: task.isCompleted,
-                            onChanged: (value) {
-                              _toggleCompleted(task);
-                            },
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.brown),
-                                onPressed: () {
-                                  _editTask(task);
-                                },
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  _deleteTask(task, false);
-                                },
-                              ),
-                            ],
-                          ),
+                      return ListTile(
+                        title: Text(task.title),
+                        subtitle: Text(
+                          'Due: ${DateFormat('dd-MM-yyyy').format(task.dateTime)} at ${DateFormat('hh:mm a').format(task.dateTime)}',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        leading: Checkbox(
+                          value: task.isCompleted,
+                          onChanged: (value) {
+                            _toggleCompleted(task);
+                          },
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.brown),
+                              onPressed: () {
+                                _editTask(task);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                _deleteTask(task, false);
+                              },
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -208,59 +260,53 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: completedTasks.length,
               itemBuilder: (context, index) {
                 final task = completedTasks[index];
-                return Container(
-                  color: Colors.grey[200], // Light grey background
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: ListTile(
-                    title: Text(task.title), // Removed strikethrough
-                    leading: Checkbox(
-                      value: task.isCompleted,
-                      onChanged: (value) {
-                        _toggleCompleted(task);
-                      },
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.brown),
-                          onPressed: () {
-                            _editTask(task);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            _deleteTask(task, true);
-                          },
-                        ),
-                      ],
-                    ),
+                return ListTile(
+                  title: Text(task.title),
+                  subtitle: Text(
+                    'Completed on: ${DateFormat('dd-MM-yyyy').format(task.dateTime)} at ${DateFormat('hh:mm a').format(task.dateTime)}',
+                  ),
+                  leading: Checkbox(
+                    value: task.isCompleted,
+                    onChanged: (value) {
+                      _toggleCompleted(task);
+                    },
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.brown),
+                        onPressed: () {
+                          _editTask(task);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          _deleteTask(task, true);
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ],
         ),
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddItem(onAdd: (title) {
-                      _addTask(title);
-                      Navigator.pop(context); // Go back after adding the item
-                    }),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add),
-            ),
-          ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddItem(onAdd: (title, dateTime) {
+                  _addTask(title, dateTime);
+                }),
+              ),
+            );
+          },
+          child: const Icon(Icons.add),
+          backgroundColor:
+              const Color.fromARGB(255, 205, 141, 77), // Custom color
         ),
       ),
     );
