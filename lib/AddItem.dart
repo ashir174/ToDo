@@ -30,7 +30,7 @@ class _AddItemState extends State<AddItem> {
               decoration: const InputDecoration(
                   labelText: 'Task Title',
                   labelStyle:
-                      TextStyle(color: Color.fromARGB(255, 185, 117, 97))),
+                      TextStyle(color: Color.fromARGB(255, 124, 124, 124))),
             ),
             const SizedBox(height: 20),
             Row(
