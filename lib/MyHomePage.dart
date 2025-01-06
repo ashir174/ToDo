@@ -307,18 +307,21 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AddItem(
-                  onAdd: _addTask,
-                );
-              },
-            );
-          },
-          child: const Icon(Icons.add),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AddItem(
+                    onAdd: _addTask,
+                  );
+                },
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
         ),
       ),
     );
