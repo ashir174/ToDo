@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 import 'task.dart';
 import 'AddItem.dart';
 
@@ -25,6 +25,14 @@ class _MyHomePageState extends State<MyHomePage> {
     filteredTasks = pendingTasks; // Initially, show all pending tasks
   }
 
+  // Function to format date and time to include AM/PM
+  String formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return "No date";
+    final DateFormat dateFormatter =
+        DateFormat('dd-MM-yyyy hh:mm a'); // Format with AM/PM
+    return dateFormatter.format(dateTime);
+  }
+
   void _addTask(String title, DateTime dateTime) {
     setState(() {
       pendingTasks.add(Task(title: title, dateTime: dateTime));
@@ -35,8 +43,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _editTask(Task task) {
     final TextEditingController editController =
         TextEditingController(text: task.title);
-    DateTime tempDate = task.dateTime;
-    TimeOfDay tempTime = TimeOfDay.fromDateTime(task.dateTime);
 
     showDialog(
       context: context,
@@ -52,45 +58,59 @@ class _MyHomePageState extends State<MyHomePage> {
                   hintText: "Enter new task title",
                 ),
               ),
-              Row(
-                children: [
-                  Text('Date: ${DateFormat('dd-MM-yyyy').format(tempDate)}'),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () async {
-                      DateTime? selected = await showDatePicker(
-                        context: context,
-                        initialDate: tempDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (selected != null && selected != tempDate) {
-                        setState(() {
-                          tempDate = selected;
-                        });
-                      }
-                    },
-                  ),
-                ],
+              const SizedBox(height: 10),
+              TextFormField(
+                initialValue: task.dateTime != null
+                    ? "${task.dateTime?.day}-${task.dateTime?.month}-${task.dateTime?.year}"
+                    : "",
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: task.dateTime ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      task.dateTime = DateTime(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                          task.dateTime?.hour ?? 0,
+                          task.dateTime?.minute ?? 0);
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  hintText: "Tap to change date",
+                ),
               ),
-              Row(
-                children: [
-                  Text('Time: ${tempTime.format(context)}'),
-                  IconButton(
-                    icon: const Icon(Icons.access_time),
-                    onPressed: () async {
-                      TimeOfDay? selected = await showTimePicker(
-                        context: context,
-                        initialTime: tempTime,
+              const SizedBox(height: 10),
+              TextFormField(
+                initialValue: task.dateTime != null
+                    ? "Time: ${task.dateTime?.hour}:${task.dateTime?.minute}"
+                    : "Time: Not Set",
+                onTap: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime:
+                        TimeOfDay.fromDateTime(task.dateTime ?? DateTime.now()),
+                  );
+                  if (pickedTime != null) {
+                    setState(() {
+                      task.dateTime = DateTime(
+                        task.dateTime?.year ?? 0,
+                        task.dateTime?.month ?? 0,
+                        task.dateTime?.day ?? 0,
+                        pickedTime.hour,
+                        pickedTime.minute,
                       );
-                      if (selected != null && selected != tempTime) {
-                        setState(() {
-                          tempTime = selected;
-                        });
-                      }
-                    },
-                  ),
-                ],
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  hintText: "Tap to change time",
+                ),
               ),
             ],
           ),
@@ -105,16 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 setState(() {
                   task.title = editController.text;
-                  task.dateTime = DateTime(
-                    tempDate.year,
-                    tempDate.month,
-                    tempDate.day,
-                    tempTime.hour,
-                    tempTime.minute,
-                  );
-                  if (!task.isCompleted) {
-                    filteredTasks = pendingTasks; // Update filtered list
-                  }
                 });
                 Navigator.pop(context); // Close the dialog
               },
@@ -180,10 +190,12 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
+          backgroundColor:
+              const Color.fromARGB(255, 225, 225, 225), // Warm beige background
           bottom: const TabBar(
-            labelColor: Color.fromARGB(255, 205, 141, 77),
+            labelColor: Color.fromARGB(255, 185, 117, 97),
             unselectedLabelColor: Colors.grey,
-            indicatorColor: Color.fromARGB(255, 205, 141, 77),
+            indicatorColor: Color.fromARGB(255, 185, 117, 97),
             tabs: [
               Tab(icon: Icon(Icons.home), text: "Pending Tasks"),
               Tab(icon: Icon(Icons.check), text: "Completed Tasks"),
@@ -220,34 +232,41 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemCount: filteredTasks.length,
                     itemBuilder: (context, index) {
                       final task = filteredTasks[index];
-                      return ListTile(
-                        title: Text(task.title),
-                        subtitle: Text(
-                          'Due: ${DateFormat('dd-MM-yyyy').format(task.dateTime)} at ${DateFormat('hh:mm a').format(task.dateTime)}',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        leading: Checkbox(
-                          value: task.isCompleted,
-                          onChanged: (value) {
-                            _toggleCompleted(task);
-                          },
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.brown),
-                              onPressed: () {
-                                _editTask(task);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _deleteTask(task, false);
-                              },
-                            ),
-                          ],
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4.0),
+                        color: const Color.fromARGB(
+                            255, 249, 249, 249), // Light task background color
+                        child: ListTile(
+                          title: Text(task.title),
+                          subtitle: Text(
+                            'Due: ${task.dateTime != null ? formatDateTime(task.dateTime) : "No date"}',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          leading: Checkbox(
+                            value: task.isCompleted,
+                            onChanged: (value) {
+                              _toggleCompleted(task);
+                            },
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.brown),
+                                onPressed: () {
+                                  _editTask(task);
+                                },
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  _deleteTask(task, false);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -260,33 +279,28 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: completedTasks.length,
               itemBuilder: (context, index) {
                 final task = completedTasks[index];
-                return ListTile(
-                  title: Text(task.title),
-                  subtitle: Text(
-                    'Completed on: ${DateFormat('dd-MM-yyyy').format(task.dateTime)} at ${DateFormat('hh:mm a').format(task.dateTime)}',
-                  ),
-                  leading: Checkbox(
-                    value: task.isCompleted,
-                    onChanged: (value) {
-                      _toggleCompleted(task);
-                    },
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.brown),
-                        onPressed: () {
-                          _editTask(task);
-                        },
+                return Card(
+                  color: const Color.fromARGB(
+                      255, 240, 240, 240), // Light grey background
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    title: Text(
+                      task.title,
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.grey,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          _deleteTask(task, true);
-                        },
-                      ),
-                    ],
+                    ),
+                    subtitle: Text(
+                      'Completed on: ${task.dateTime != null ? formatDateTime(task.dateTime) : "No date"}',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.undo, color: Colors.green),
+                      onPressed: () {
+                        _toggleCompleted(task);
+                      },
+                    ),
                   ),
                 );
               },
@@ -295,18 +309,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddItem(onAdd: (title, dateTime) {
-                  _addTask(title, dateTime);
-                }),
-              ),
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AddItem(
+                  onAdd: _addTask,
+                );
+              },
             );
           },
           child: const Icon(Icons.add),
-          backgroundColor:
-              const Color.fromARGB(255, 205, 141, 77), // Custom color
         ),
       ),
     );

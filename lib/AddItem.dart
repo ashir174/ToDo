@@ -28,8 +28,9 @@ class _AddItemState extends State<AddItem> {
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(
-                labelText: 'Task Title',
-              ),
+                  labelText: 'Task Title',
+                  labelStyle:
+                      TextStyle(color: Color.fromARGB(255, 185, 117, 97))),
             ),
             const SizedBox(height: 20),
             Row(

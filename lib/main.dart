@@ -1,5 +1,5 @@
-import 'package:androidstudioprojects/MyHomePage.dart';
 import 'package:flutter/material.dart';
+import 'MyHomePage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,54 +7,49 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Todo App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color.fromARGB(255, 211, 159, 108), // Primary color
+        primaryColor: const Color(0xFFF0F0F0), // Light grey for primary color
         colorScheme: ColorScheme.fromSeed(
-            seedColor:
-                const Color.fromARGB(255, 211, 159, 108)), // New colorScheme
+          seedColor: const Color(0xFFF0F0F0),
+        ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color.fromARGB(255, 211, 159, 108), // FAB color
+          backgroundColor:
+              Color.fromARGB(255, 219, 163, 123), // Light orange for FAB
+          splashColor: Color(0xFFFFE0B2), // Soft glow effect on interaction
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromARGB(
-              255, 240, 240, 240), // Subtle grey color for the AppBar
-          elevation: 1, // Optional: adds a subtle shadow
+          backgroundColor: Color(0xFFF0F0F0), // Light grey for AppBar
+          elevation: 1,
           titleTextStyle: TextStyle(
-            color: Colors.black, // Set AppBar title text color
+            color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
           iconTheme: IconThemeData(
-            color: Colors.black, // Set AppBar icon color (like the back button)
+            color: Color.fromARGB(255, 0, 0, 0), // Orange icons in AppBar
           ),
         ),
         tabBarTheme: const TabBarTheme(
-          labelColor: Color.fromARGB(255, 211, 159, 108), // Active tab color
-          unselectedLabelColor:
-              Color.fromARGB(255, 207, 207, 207), // Unselected tab color
-          indicatorColor:
-              Color.fromARGB(255, 211, 159, 108), // Tab indicator color
-        ),
-        textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            color: Colors.black87, // AppBar title color
-            fontSize: 20,
+          labelColor: Colors.black, // Black for active tab text
+          unselectedLabelColor: Colors.grey, // Grey for inactive tab text
+          indicatorColor: Color.fromARGB(
+              255, 185, 117, 97), // Orange for active tab underline
+          labelStyle: TextStyle(
             fontWeight: FontWeight.bold,
           ),
-          bodyLarge: TextStyle(
-            color: Colors.black, // Body text color
-          ),
+        ),
+        iconTheme: const IconThemeData(
+          color: Color.fromARGB(255, 185, 117, 97), // Light skin for icons
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(
-        title: "Dashboard",
-      ),
+      home: const MyHomePage(title: "Dashboard"),
     );
   }
 }
